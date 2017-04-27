@@ -146,7 +146,7 @@ void modelDefinition(NNmodel &model)
     model.addNeuronPopulation<NeuronModels::Poisson>("PN", _NAL, myPOI_p, myPOI_ini);
     model.addNeuronPopulation<NeuronModels::RulkovMap>("KC", _NMB, stdRMP_p, stdRMP_ini);
     model.addNeuronPopulation<NeuronModels::RulkovMap>("LHI", _NLHI, stdRMP_p, stdRMP_ini);
-    model.addNeuronPopulation<NeuronModels::RulkovMap>("DN", _NLB, stdRMP_p, stdRMP_ini);
+    auto *dn = model.addNeuronPopulation<NeuronModels::RulkovMap>("DN", _NLB, stdRMP_p, stdRMP_ini);
     
     model.addSynapsePopulation<WeightUpdateModels::StaticPulse, PostsynapticModels::ExpCond>("PNKC", SynapseMatrixType::DENSE_INDIVIDUALG, NO_DELAY,
                                                                                              "PN", "KC",
@@ -168,6 +168,8 @@ void modelDefinition(NNmodel &model)
                                                                                               "DN", "DN",
                                                                                               myDNDN_p, myDNDN_ini,
                                                                                               postExpDNDN, {});
+    dn->setSpikeZeroCopyEnabled(true);
+    
 #ifdef nGPU 
     cerr << "nGPU: " << nGPU << endl;
     model.setGPUDevice(nGPU);
