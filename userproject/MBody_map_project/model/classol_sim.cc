@@ -164,9 +164,12 @@ void cameraThreadHandler(unsigned int device)
     cv::Mat squareROI = rawFrame(square);
     cv::Mat greyscaleFrame;
     cv::Mat downsampledFrame;
+    cv::Mat thresholdedFrame;
 
     cv::namedWindow("Frame", CV_WINDOW_NORMAL);
+    cv::namedWindow("Thresholded", CV_WINDOW_NORMAL);
     cv::resizeWindow("Frame", 320, 320);
+    cv::resizeWindow("Thresholded", 320, 320);
 
     const auto cameraBegin = sim_clock::now();
     unsigned int i;
@@ -183,8 +186,16 @@ void cameraThreadHandler(unsigned int device)
         // Resample
         cv::resize(greyscaleFrame, downsampledFrame,
                    cv::Size(32, 32));
-
         cv::imshow("Frame", downsampledFrame);
+
+        cv::Scalar mean;
+        cv::Scalar stdDev;
+        cv::meanStdDev(downsampledFrame, mean, stdDev);
+
+        //cv::threshold(downsampledFrame, thresholdedFrame, mean + stdDev, 0.0, THRESH_TRUNC);
+        cv::threshold(downsampledFrame, thresholdedFrame, mean.val[0] - stdDev.val[0], 255.0, CV_THRESH_BINARY_INV);
+        cv::imshow("Thresholded", thresholdedFrame);
+
         cv::waitKey(1);
     }
 
